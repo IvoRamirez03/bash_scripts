@@ -2,5 +2,6 @@
 
 ## Various scripts to automate tasks to work together with an MDM ([Applivery](https://github.com/applivery) in this case)
 
-> MacOS with ARM it's very complicated, permissions are very strict, a lot of debug...
+> Coming from GNU/Linux, it isn't so complicated, but
+> MacOS with ARM it's very "special", permissions are very strict, a lot of debug...
 > Somedays I had headhaches working with it haha, above all with VPN and network scripts.
