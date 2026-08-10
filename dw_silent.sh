@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuración
-USER_EMAIL="ivo.ramirez@okdiario.com"
+USER_EMAIL="yourcompany@yourdomain.com"
 INSTALL_PASS="165-723-701" 
 AGENT_NAME=$(hostname)
 DEBUG_LOG="/tmp/dwagent_debug.log"
