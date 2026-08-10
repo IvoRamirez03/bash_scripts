@@ -21,3 +21,6 @@ bash_history
 # Environment files
 .env
 env_file
+
+# Sensitive files
+add_printers_okd.sh
