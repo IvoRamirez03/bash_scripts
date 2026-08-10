@@ -1,41 +1,41 @@
 #!/bin/bash
 
-# Estructura: "NOMBRE|DESCRIPCION|IP|DEFAULT(yes/no)"
-IMPRESORAS=(
-    "192.168.2.20|impresora-respaldo|192.168.2.20|no"   
-    "192.168.2.24|Impresora-A3|192.168.2.24|no"
-    "192.168.2.35|Impresora-Oficial|192.168.2.35|yes" # <-- Impresora por omisión
-    "192.168.2.39|Impresora-Cool|192.168.2.39|no"
+# Agree how many printers you want in the list.
+# Use pipes to divide the information since the dots in the IPs can mess up the script. 
+# Structure: "NAME|DESCRIPTION|IP|DEFAULT(yes/no)" (Use your own printer names and IPs)
+PRINTERS=(
+    "192.168.0.10|printer1-name|192.168.0.10|no"   
+    "192.168.0.11|printer2-name|192.168.0.11|no"
+    "192.168.0.12|printer3-name|192.168.0.12|yes" 
+    "192.168.0.13|printer4-name|192.168.0.13|no"
 )
+    
 
-# Agrega cuantas impresoras quieras en el listado. 
-# Usa pipes para dividir la información ya que con los puntos de las IP's puede joder el script.
-
-agregar_impresora() {
-    local nombre="$1"
+add_printer() {
+    local name="$1"
     local desc="$2"
     local ip="$3"
     local is_default="$4"
 
-    echo "[INFO]: Añadiendo '$desc' ($ip)..."
-    lpadmin -p "$nombre" -E -D "$desc" -v "ipp://$ip:631/ipp/print" -m everywhere
+    echo "[INFO]: Adding '$desc' ($ip)..."
+    lpadmin -p "$name" -E -D "$desc" -v "ipp://$ip:631/ipp/print" -m everywhere
     
-    # Si esta marcada como default, la establecemos como predeterminada
+    # If it is marked as default, we set it as the default printer
     if [ "$is_default" = "yes" ]; then
-        lpadmin -d "$nombre"
-        echo "[INFO]: '$desc' configurada como IMPRESORA POR DEFECTO."
+        lpadmin -d "$name"
+        echo "[INFO]: '$desc' Default printer set."
     fi
 
     sleep 5
 }
 
-# Limpieza inicial
+# Initial cleanup
 lpstat -v | awk '{print $3}' | sed 's/://' | xargs -r -I {} lpadmin -x {}
 
-# Recorrer lista
-for item in "${IMPRESORAS[@]}"; do
-    IFS='|' read -r nombre desc ip es_default <<< "$item"
-    agregar_impresora "$nombre" "$desc" "$ip" "$es_default"
+# Iterate through the list
+for item in "${PRINTERS[@]}"; do
+    IFS='|' read -r name desc ip is_default <<< "$item"
+    add_printer "$name" "$desc" "$ip" "$is_default"
 done
 
-echo "Proceso completado con éxito."
+echo "Process completed successfully."
