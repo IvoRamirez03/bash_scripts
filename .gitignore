@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# temporary and editor files
+*.swp
+*~
+*.bak
+*.tmp
+
+# log files
+*.log
+
+# compiled output
+*.o
+*.out
+
+# shell history
+.history
+bash_history
+
+# Environment files
+.env
+env_file
