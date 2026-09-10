@@ -148,5 +148,5 @@ if [ "$dialog_results" = "2" ]; then
     sleep 2
     reboot
 else
-    echo "[INFO]: El usuario ha pospuesto el reinicio."
+    echo "[INFO]: El usuario ha pospuesto el reinicio: (Exit code: $dialog_results)."
 fi
