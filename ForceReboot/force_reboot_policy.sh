@@ -7,37 +7,37 @@
 # Version: 2.0.0
 # ---
 
-# ==========================================
+
 # 1. CLEANUP OLD INSTALLATIONS
-# ==========================================
+
 DIALOG_OLD="/Applications/Dialog.app"
 
 if [ -d "$DIALOG_OLD" ]; then
-    echo "→ Dialog.app antiguo encontrado"
+    echo "[INFO]: Dialog.app antiguo encontrado"
     pgrep -if "Dialog.app" && {
-        echo "  → Cerrando Dialog..."
+        echo "[INFO]: Cerrando Dialog..."
         pkill -if "Dialog.app" 2>/dev/null
         sleep 1
     }
     if sudo rm -rf "$DIALOG_OLD" 2>/dev/null; then
-        echo "  → Eliminado correctamente"
+        echo "[INFO]: Eliminado correctamente"
     else
-        echo "  → No se pudo eliminar la app antigua."
+        echo "[ERROR]: No se pudo eliminar la app antigua."
     fi
 else
-    echo "→ No hay Dialog.app antiguo presente"
+    echo "[INFO]: No hay Dialog.app antiguo presente"
 fi
 
-# ==========================================
+
 # 2. PRE-FLIGHT & BRANDING SETUP
-# ==========================================
+
 PATH=/usr/bin:/bin:/usr/sbin:/sbin
 
 DIALOG_CLI="/usr/local/bin/dialog"
 DIALOG_APP="/Library/Application Support/Dialog/Dialog.app"
 DIALOG_ICON_DIR="/Library/Application Support/Dialog"
 DIALOG_ICON="$DIALOG_ICON_DIR/Dialog.png"
-BRAND_ICON="/var/root/AppliveryAssets/applivery.png"
+BRAND_ICON="/var/root/AppliveryAssets/Dialog.png"
 
 needs_install=0
 needs_reinstall=0
@@ -87,9 +87,9 @@ if [ -f "$BRAND_ICON" ]; then
     rm -f "$tmp_brand"
 fi
 
-# ==========================================
+
 # 3. SWIFTDIALOG INSTALLATION
-# ==========================================
+
 if [ "$needs_install" -eq 1 ] || [ "$needs_reinstall" -eq 1 ]; then
     pkg_url="$(get_swiftdialog_pkg_url 2>/dev/null || true)"
     if [ -n "$pkg_url" ]; then
@@ -98,58 +98,55 @@ if [ "$needs_install" -eq 1 ] || [ "$needs_reinstall" -eq 1 ]; then
         installer -pkg "$pkg_path" -target /
         rm -f "$pkg_path"
     else
-        echo "ERROR: No se pudo obtener la URL de swiftDialog." >&2
+        echo "[ERROR]: No se pudo obtener la URL de swiftDialog." >&2
         exit 1
     fi
 fi
 
 killall Dialog 2>/dev/null
 
-# ==========================================
+
 # 4. CÁLCULO DEL UPTIME
-# ==========================================
+
 current_unix_time="$(date '+%s')"
 boot_time_unix="$(sysctl -n kern.boottime | awk -F 'sec = |, usec' '{ print $2; exit }')"
 uptime_seconds="$(( current_unix_time - boot_time_unix ))"
 uptime_days="$(( uptime_seconds / 86400 ))"
 
-TEST_UPTIME_DAYS="10" # Descomenta esta línea para pruebas (simula X días de uptime)
+#TEST_UPTIME_DAYS="10" # Descomenta esta línea para pruebas (simula X días de uptime)
 
 if [ -n "$TEST_UPTIME_DAYS" ]; then
     uptime_days="$TEST_UPTIME_DAYS"
 fi
 
-# ==========================================
+
 # 5. LÓGICA DE AVISO CON OPCIÓN DE POSPONER
-# ==========================================
+
 if [ "$uptime_days" -gt 9 ]; then
-    echo "Uptime: $uptime_days días (10 o más). Requiere atención. Mostrando aviso..."
+    echo "[INFO]: Uptime: $uptime_days días (10 o más). Requiere atención. Mostrando aviso..."
     afplay "/System/Library/Sounds/Sosumi.aiff" &
 
     run_as_user "$DIALOG_CLI" \
         --title "Es necesario reiniciar" \
-        --message "*¡Llevas ${uptime_days} días sin reiniciar!* \n\nPor favor, guarda tu trabajo y reinicia el equipo. Si lo pospones, recibirás un recordatorio." \
+        --message "*¡Llevas ${uptime_days} días sin reiniciar!* \n\nPor favor, guarda tu trabajo y reinicia cuando puedas. Este aviso volverá a aparecer hasta que reinicies el equipo." \
         --icon "$DIALOG_ICON" \
-        --button1text "Reiniciar ahora" \
-        --button2text "Posponer" \
+        --button1text "Posponer" \
+        --button2text "Reiniciar ahora" \
         --timer 840 --width 650 --height 280 --position bottomright --ontop
 
     dialog_results=$?
 else
-    echo "Uptime: $uptime_days días. No se requiere acción (9 días o menos)."
+    echo "[INFO]: Uptime: $uptime_days días. No se requiere acción (9 días o menos)."
     exit 0
 fi
 
-# ==========================================
-# 6. EJECUCIÓN DEL REINICIO
-# ==========================================
-if [ "$dialog_results" = "0" ] || [ "$dialog_results" = "4" ]; then
-    echo "Reiniciando ahora..."
+
+# 6. LÓGICA DE REINICIO O POSPONER
+if [ "$dialog_results" = "2" ]; then
+    echo "[INFO]: Reiniciando..."
     shutdown -r now
     sleep 2
     reboot
-elif [ "$dialog_results" = "2" ]; then
-    echo "El usuario ha pospuesto el reinicio."
+else
+    echo "[INFO]: El usuario ha pospuesto el reinicio."
 fi
-
-exit 0
