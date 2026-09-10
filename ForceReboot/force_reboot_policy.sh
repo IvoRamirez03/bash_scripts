@@ -2,8 +2,8 @@
 
 # ---
 # Title: Force Reboot Policy (Uptime Enforcement)
-# Description: Muestra un diálogo con opción de posponer cuando el equipo lleva entre 9 y 12 días sin reiniciar.
-# Author: Applivery
+# Description: Muestra un diálogo con opción de posponer cuando el equipo lleva 10 días o más sin reiniciar. Si el usuario elige reiniciar, se ejecuta un reinicio inmediato.
+# Author: Ivo Ramirez
 # Version: 2.0.0
 # ---
 
